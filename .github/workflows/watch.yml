@@ -1,0 +1,24 @@
+name: hypixel-watch
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python check.py
+        env:
+          HYPIXEL_API_KEY: ${{ secrets.HYPIXEL_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PLAYER_NAME: ${{ vars.PLAYER_NAME }}
+      - run: |
+          git config user.name "hypixel-watch"
+          git config user.email "actions@github.com"
+          git add state.txt
+          git diff --cached --quiet || (git commit -m "update state" && git push)
